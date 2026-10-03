@@ -1,0 +1,76 @@
+name: wallet-ledger
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: wallet
+      POSTGRES_PASSWORD: wallet
+      POSTGRES_DB: wallet
+    ports:
+      - "5433:5432"   # 5433 on the host so it doesn't clash with a locally installed Postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wallet -d wallet"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build: .
+    image: wallet-ledger:local
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/wallet
+      DB_USER: wallet
+      DB_PASSWORD: wallet
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_MODEL: ${LLM_MODEL:-claude-opus-5-5}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    image: wallet-ledger:local
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/wallet
+      DB_USER: wallet
+      DB_PASSWORD: wallet
+      WALLET_WORKER_ENABLED: "true"
+      RECONCILIATION_CRON: ${RECONCILIATION_CRON:-0 30 2 * * *}
+      SPRING_MAIN_WEB_APPLICATION_TYPE: none
+      SPRING_MAIN_KEEP_ALIVE: "true"
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_MODEL: ${LLM_MODEL:-claude-opus-5-5}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_started
+
+  # The full test suite against the compose database:
+  #   docker compose run --rm tests
+  tests:
+    profiles: ["test"]
+    image: maven:3.9-eclipse-temurin-21
+    working_dir: /src
+    command: ["mvn", "-B", "verify"]
+    environment:
+      TEST_DB_URL: jdbc:postgresql://db:5432/wallet_test
+      TEST_DB_USER: wallet
+      TEST_DB_PASSWORD: wallet
+    volumes:
+      - .:/src
+      - m2-cache:/root/.m2
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  m2-cache:

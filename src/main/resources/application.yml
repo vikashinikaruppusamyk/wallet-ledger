@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: wallet-ledger
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/wallet}
+    username: ${DB_USER:wallet}
+    password: ${DB_PASSWORD:wallet}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+  flyway:
+    # db/devtools holds the demo seed function; drop that location in production.
+    locations: classpath:db/migration,classpath:db/devtools
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    deserialization:
+      # Money is an integer number of paise: reject 10.5 instead of silently truncating it,
+      # and reject "10" instead of coercing a string.
+      accept-float-as-int: false
+      fail-on-null-for-primitives: true
+    mapper:
+      allow-coercion-of-scalars: false
+  task:
+    execution:
+      thread-name-prefix: wallet-task-
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+wallet:
+  timezone: Asia/Kolkata
+  withdrawal-fee-paise: ${WITHDRAWAL_FEE_PAISE:500}
+  worker:
+    # Only the worker container schedules the nightly job.
+    enabled: ${WALLET_WORKER_ENABLED:false}
+  reconciliation:
+    cron: ${RECONCILIATION_CRON:0 30 2 * * *}
+  llm:
+    provider: ${LLM_PROVIDER:mock}
+    model: ${LLM_MODEL:claude-opus-5-5}
+    mock-fixtures: classpath:llm/mock-questions.json
+
+logging:
+  pattern:
+    level: "%5p [%X{requestId:-}]"

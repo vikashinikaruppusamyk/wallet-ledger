@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/wallet_test}
+    username: ${TEST_DB_USER:wallet}
+    password: ${TEST_DB_PASSWORD:wallet}
+    hikari:
+      maximum-pool-size: 30
+  flyway:
+    # Tests start from an empty schema (see TestDatabaseConfig).
+    clean-disabled: false
+
+wallet:
+  worker:
+    enabled: false
+  llm:
+    provider: mock
+  withdrawal-fee-paise: 500
+
+logging:
+  level:
+    root: WARN
+    com.walletledger: INFO
