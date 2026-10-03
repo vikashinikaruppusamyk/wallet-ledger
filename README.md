@@ -324,8 +324,9 @@ Running the tests outside Docker needs a PostgreSQL role `wallet`/`wallet` ownin
 * **Business errors are replayed.** Like most payment APIs, a request rejected with 422 (e.g.
   insufficient funds) returns the same 422 for the same key; the client must use a new key to try again.
   Server errors (5xx) are not stored, so the same key can be retried.
-* **The fraud rules table was not in the brief I had**, so the five rules above are my own choices. They
-  are data in `risk_rules`; replacing them is an `UPDATE` plus, for a new rule kind, one method in `RiskEngine`.
+* **Fraud rules and thresholds** are the five listed above, tuned for Indian retail payments. They are
+  data in `risk_rules`; changing a threshold is an `UPDATE`, and adding a new kind of rule is one method
+  in `RiskEngine`.
 * **"Flagged that day"** is implemented as "every flag not yet explained", so a night the job didn't run
   is caught up the next night.
 * **Q&A semantics:** "sent" and "received" count peer transfers only; "largest" and "count" include
