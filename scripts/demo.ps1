@@ -75,14 +75,6 @@ function Balance([long]$Wallet, [long]$User) {
 }
 
 # ---------------------------------------------------------------------------------------------
-Step "PAYMENTS-GRADE WALLET LEDGER - demo" @(
-    "Spring Boot + PostgreSQL. Double-entry: every rupee is written as a debit and a matching credit.",
-    "Money never appears from nowhere, disappears, or moves twice.",
-    "",
-    "  1. One transfer end to end      2. A client retry (idempotency)",
-    "  3. A transfer held by a fraud rule, then released by an admin",
-    "  4. A reconciliation run         5. A plain-English statement question")
-
 Step "SETUP - two users, a wallet each, Asha tops up Rs. 1,000" @(
     "Create users Asha and Rahul and open a wallet for each.",
     "Asha tops up Rs. 1,000: a TOP_UP transfer from the system CASH_IN account to her wallet.")
@@ -202,14 +194,3 @@ foreach ($q in @("How much did I send to Rahul this month?", "What is the weathe
     Write-Host ""
 }
 Note "The LLM only turns the question into JSON; the number comes from a parameterised query on Asha's own rows."
-Pause-Here
-Write-Host ""
-Write-Host ("=" * 78) -ForegroundColor DarkGray
-Write-Host "  DEMO COMPLETE" -ForegroundColor Cyan
-Write-Host ("=" * 78) -ForegroundColor DarkGray
-Write-Host "  Also covered by automated tests, passing in CI:" -ForegroundColor White
-Write-Host "    - stampede: 100 concurrent Rs. 10 transfers from Rs. 500 -> exactly 50 succeed (x20 runs)" -ForegroundColor White
-Write-Host "    - idempotency: 10 parallel retries with one key -> exactly 1 transfer" -ForegroundColor White
-Write-Host "    - reconciliation: 3 deliberate corruptions in 10,000 transfers -> exactly 3 problems reported" -ForegroundColor White
-Write-Host "    - prompt injection: a malicious transfer note cannot widen the answer beyond the caller's data" -ForegroundColor White
-Write-Host ""
