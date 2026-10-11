@@ -1,5 +1,7 @@
 # Payments-grade wallet ledger
 
+**Demo video:** [wallet-ledger-demo.mp4](https://drive.google.com/file/d/19V7KZgdvXk6E3_WOIYEpBZHIktOwYZ57/view?usp=sharing) - one transfer end to end, one retry, one held transfer, one reconciliation run, one Q&A answer.
+
 The backend of a digital wallet: users open wallets, top up, pay each other and withdraw. Every rupee is
 written twice (a debit and a matching credit), the books are checked every night, risky transfers are
 held for review, and users can ask plain-English questions about their statement.
